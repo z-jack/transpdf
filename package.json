@@ -12,8 +12,8 @@
   },
   "dependencies": {
     "iview": "^3.4.2",
-    "natural": "^0.6.3",
     "pdfjs-dist": "^2.1.266",
+    "sbd": "^1.0.16",
     "vue": "^2.6.10",
     "vue-router": "^3.0.3",
     "vuex": "^3.0.1"

@@ -32,35 +32,56 @@
 
 <script>
 import PDF from "pdfjs-dist";
-import { Promise } from 'q';
+import { Promise } from "q";
+import sbd from "sbd";
 
 export default {
-  data () {
+  data() {
     return {
       files: []
-    }
+    };
   },
   methods: {
-    handleTabsAdd () {
-      this.$refs.pdfUploader.$el.children[0].click()
+    handleTabsAdd() {
+      this.$refs.pdfUploader.$el.children[0].click();
     },
-    closePDF () {
-
-    },
-    readPDF (e) {
-      const reader = new FileReader()
+    closePDF() {},
+    readPDF(e) {
+      const reader = new FileReader();
       reader.onload = async () => {
-        const pdf = await PDF.getDocument(reader.result)
-        const pages = await Promise.all(Array(pdf.numPages).fill(0).map((_, i) => pdf.getPage(i + 1)))
-        const textContexts = await Promise.all(pages.map(page => page.getTextContent()))
-        const naiveText = textContexts.map(c => c.items.map(t => t.str).join('')).join('')
-        console.log(naiveText)
-      }
-      reader.readAsArrayBuffer(e)
-      return false
+        const pdf = await PDF.getDocument(reader.result).promise;
+        const pages = await Promise.all(
+          Array(pdf.numPages)
+            .fill(0)
+            .map((_, i) => pdf.getPage(i + 1))
+        );
+        const textContexts = await Promise.all(
+          pages.map(page => page.getTextContent())
+        );
+        console.log(textContexts)
+        const naiveText = textContexts
+          .map(c =>
+            c.items
+              .map((t, i, a) =>
+                t.str.endsWith("-") ||
+                (i < a.length - 1 &&
+                  /[A-Z]$/.test(t.str) &&
+                  /^[A-Z]{2}/.test(a[i + 1].str))
+                  ? t.str
+                  : t.str + " "
+              )
+              .join("")
+          )
+          .map(c => (c.endsWith("-") ? c : c + " "))
+          .join("");
+        console.log(naiveText);
+        console.log(sbd.sentences(naiveText));
+      };
+      reader.readAsArrayBuffer(e);
+      return false;
     }
   }
-}
+};
 </script>
 
 <style>
